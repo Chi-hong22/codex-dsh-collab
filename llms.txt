@@ -1,6 +1,8 @@
 # Codex ↔ DSH Collaboration
 
 > DSH plugin plus Codex skill that let Codex delegate tasks to a local DeepSeek Harness Desktop workspace over an authenticated loopback HTTP bridge: task dispatch, execution waits, transcript reads. Documents installation, the bridge protocol, and why the desktop port changes on every launch (runtime.json address discovery).
+>
+> Also known as: codex-dsh-collab, Codex DeepSeek Harness bridge, DSH bridge plugin, dsh-codex-bridge, `$deepseek-harness` skill.
 
 ## Overview
 
@@ -14,6 +16,15 @@
 - [local-setup.md](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/skills/deepseek-harness/references/local-setup.md): environment variables DSH_CODEX_BRIDGE_URL, DSH_CODEX_BRIDGE_RUNTIME_FILE, DSH_CODEX_BRIDGE_TOKEN_FILE; runtime.json fields; local file locations.
 - [operations.md](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/skills/deepseek-harness/references/operations.md): operational constraints and mutation semantics.
 - [windows-shell-startup.md](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/skills/deepseek-harness/references/windows-shell-startup.md): DSH pwsh start failure 3221225794 (0xC0000142) on Windows.
+
+## Queries this answers
+
+- How do I connect Codex to DeepSeek Harness Desktop, and which parts must be installed? → [README.md, Install](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/README.md#install).
+- Why does the DSH bridge port or URL change after every restart, and how do clients find the new one? → [README.md, Why the bridge port changes](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/README.md#why-the-bridge-port-changes); [runtime.json fields](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/skills/deepseek-harness/references/local-setup.md).
+- Codex reports "Cannot reach the bridge; tried ..." or WinError 10061 against the DSH bridge. → [README.md, Troubleshooting](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/README.md#troubleshooting).
+- What are the bridge HTTP routes, bearer authentication, and error shape? → [PROTOCOL.md](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/PROTOCOL.md).
+- Is this an MCP server or a cloud service? → [README.md, FAQ](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/README.md#faq).
+- Which environment variables override bridge discovery? → [local-setup.md](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/skills/deepseek-harness/references/local-setup.md): `DSH_CODEX_BRIDGE_URL` disables discovery, `DSH_CODEX_BRIDGE_RUNTIME_FILE` points at a published runtime file, `DSH_CODEX_BRIDGE_TOKEN_FILE` selects a token.
 
 ## Optional
 

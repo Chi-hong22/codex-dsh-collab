@@ -2,7 +2,9 @@
 
 [English](README.md) · [桥接协议](PROTOCOL.md) · [AI 索引](llms.txt)
 
-Codex 通过本机回环认证桥，把任务交给 DeepSeek Harness（DSH）工作区，等待执行、回读转写，再接着对话。仓库包含一个 DSH 插件和配套的 `$deepseek-harness` Codex 技能。
+Codex 通过本机回环认证桥，把任务交给 DeepSeek Harness Desktop（DSH）工作区，等待执行、回读转写，再接着对话。仓库包含一个 DSH 插件和配套的 `$deepseek-harness` Codex 技能。
+
+npm 包名为 `@esroamer/codex-dsh-collab`，桥模块名为 `dsh-codex-bridge`。
 
 | 组成 | 作用 |
 | --- | --- |
@@ -135,11 +137,39 @@ DSH Desktop 用 `--port 0` 启动 Web 服务，Windows 每次启动都会分配�
 - [windows-shell-startup.md](skills/deepseek-harness/references/windows-shell-startup.md)：`3221225794` 的排查记录。
 - [llms.txt](llms.txt)：面向 AI 检索的项目索引。
 
-### 常见问题
+## 常见问题
 
-- **DSH 会主动唤醒 Codex 吗？** 不会。所有交互由 Codex 发起，DSH 只应答和执行。
-- **文件放在哪里？** 默认在 `~/.dsh/codex-bridge/` 下：`runtime.json`、`tokens.json`、`state.json` 和令牌文件。安装清单位于 `~/.dsh/codex-bridge-install/installation.json`。
-- **其他 agent 软件能用吗？** 可以，按 [PROTOCOL.md](PROTOCOL.md) 实现即可；本仓库目前只验证了 Codex 客户端。
+### 怎样把 Codex 接到 DeepSeek Harness Desktop？
+
+在 设置 → 插件 中添加本插件，克隆本仓库后运行 `install.ps1 -ConfigureOnly`，重启 DSH，再运行 `install.ps1 -Check`；之后在 Codex 中调用 `$deepseek-harness`。见 [安装](#安装)。
+
+### 为什么 DSH 每次重启后桥端口都会变？
+
+DSH Desktop 用 `--port 0` 启动 Web 服务，Windows 每次启动都会分配新的空闲端口。0.3.0 起插件把实际地址写入 `runtime.json`，客户端先读它，读不到再回退到配置的 `base_url`。见 [桥地址为什么会变](#桥地址为什么会变)。
+
+### 重启后 Codex 报 “Cannot reach the bridge” 怎么办？
+
+客户端多半还在用上一次的端口。把插件升级到 0.3.0 或更高，重跑 `-ConfigureOnly` 让 `local-settings.json` 写入 `runtime_file`，重启 DSH 后重试。见 [故障排查](#故障排查)。
+
+### 这是 MCP 服务器吗？
+
+不是。它是一个本机认证的 HTTP/JSON 桥，协议见 [PROTOCOL.md](PROTOCOL.md)。任何能发 HTTP 请求的 agent 软件都可以实现客户端。
+
+### 支持 macOS 或 Linux 吗？
+
+安装脚本和 Codex 技能只在 Windows 上验证过；桥本身是回环 HTTP 服务，不依赖 Windows。
+
+### DSH 会主动唤醒 Codex 吗？
+
+不会。所有交互由 Codex 发起，DSH 只应答和执行。
+
+### 文件放在哪里？
+
+默认在 `~/.dsh/codex-bridge/` 下：`runtime.json`、`tokens.json`、`state.json` 和令牌文件。安装清单位于 `~/.dsh/codex-bridge-install/installation.json`。
+
+### 其他 agent 软件能用吗？
+
+可以，按 [PROTOCOL.md](PROTOCOL.md) 实现即可；本仓库目前只验证了 Codex 客户端。
 
 ## 上游与许可
 

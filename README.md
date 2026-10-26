@@ -2,7 +2,9 @@
 
 [中文说明](README.zh-CN.md) · [Bridge protocol](PROTOCOL.md) · [AI index](llms.txt)
 
-Codex delegates tasks to a local DeepSeek Harness (DSH) workspace through an authenticated loopback HTTP bridge, waits for the run, reads the transcript, and continues the conversation. The repository ships a DSH plugin and the `$deepseek-harness` Codex skill that talks to it.
+Codex delegates tasks to a local DeepSeek Harness Desktop (DSH) workspace through an authenticated loopback HTTP bridge, waits for the run, reads the transcript, and continues the conversation. The repository ships a DSH plugin and the `$deepseek-harness` Codex skill that talks to it.
+
+The npm package is `@esroamer/codex-dsh-collab`; the bridge module name is `dsh-codex-bridge`.
 
 | Part | Role |
 | --- | --- |
@@ -135,11 +137,39 @@ This is a DSH runtime problem with Windows shell startup, not a bridge problem. 
 - [windows-shell-startup.md](skills/deepseek-harness/references/windows-shell-startup.md): the `3221225794` case.
 - [llms.txt](llms.txt): project index for AI search and retrieval.
 
-### Common questions
+## FAQ
 
-- **Does DSH wake an idle Codex session?** No. Everything starts from Codex; DSH only answers and executes.
-- **Where are the files?** By default under `~/.dsh/codex-bridge/`: `runtime.json`, `tokens.json`, `state.json`, and the token file. The installer manifest is `~/.dsh/codex-bridge-install/installation.json`.
-- **Can another agent application use the bridge?** Yes, by implementing [PROTOCOL.md](PROTOCOL.md). Only the Codex client is tested in this repository.
+### How do I connect Codex to DeepSeek Harness Desktop?
+
+Add the DSH plugin under Settings → Plugins, clone this repository, run `install.ps1 -ConfigureOnly`, restart DSH, and run `install.ps1 -Check`. Then invoke `$deepseek-harness` in Codex. See [Install](#install).
+
+### Why does the bridge port change after every DSH restart?
+
+DSH Desktop starts its web server with `--port 0`, so Windows assigns a new free port on each launch. Since 0.3.0 the plugin publishes the live address to `runtime.json`, and clients read it before falling back to the configured `base_url`. See [Why the bridge port changes](#why-the-bridge-port-changes).
+
+### Codex says "Cannot reach the bridge" after a restart. What now?
+
+The client is probably using the previous port. Update the plugin to 0.3.0 or later, rerun `-ConfigureOnly` so `local-settings.json` gains `runtime_file`, restart DSH, and retry. See [Troubleshooting](#troubleshooting).
+
+### Is this an MCP server?
+
+No. It is a small authenticated HTTP/JSON bridge, documented in [PROTOCOL.md](PROTOCOL.md). Any agent application that can send HTTP requests can implement a client.
+
+### Does it work on macOS or Linux?
+
+The setup script and the Codex skill are tested on Windows only. The bridge itself is a loopback HTTP server and does not depend on Windows.
+
+### Does DSH wake an idle Codex session?
+
+No. Everything starts from Codex; DSH only answers and executes.
+
+### Where are the files?
+
+By default under `~/.dsh/codex-bridge/`: `runtime.json`, `tokens.json`, `state.json`, and the token file. The installer manifest is `~/.dsh/codex-bridge-install/installation.json`.
+
+### Can another agent application use the bridge?
+
+Yes, by implementing [PROTOCOL.md](PROTOCOL.md). Only the Codex client is tested in this repository.
 
 ## Upstream and license
 
