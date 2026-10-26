@@ -10,7 +10,7 @@ npm 包名为 `@esroamer/codex-dsh-collab`。交互由 Codex 发起；DSH 不会
 
 ## 安装
 
-1. 在 DSH 中打开 **设置 → 插件 → 添加插件**，输入 GitHub 仓库地址 `https://github.com/ESROAMER/codex-dsh-collab`、本地目录或 npm 包名 `@esroamer/codex-dsh-collab`。全部工作区和工作区注册功能需要 **0.2.0 或更高**。
+1. 在 DSH 中打开 **设置 → 插件 → 添加插件**，输入 GitHub 仓库地址 `https://github.com/Chi-hong22/codex-dsh-collab`、本地目录或 npm 包名 `@esroamer/codex-dsh-collab`。全部工作区和工作区注册功能需要 **0.2.0 或更高**。
 2. 下载或克隆本仓库，在仓库根目录运行：
 
    ```powershell
@@ -23,6 +23,8 @@ npm 包名为 `@esroamer/codex-dsh-collab`。交互由 Codex 发起；DSH 不会
    ```powershell
    .\install.ps1 -Check
    ```
+
+   桌面启动时由系统分配端口，插件会把实际地址写入 `runtime.json`（默认 `~/.dsh/codex-bridge/runtime.json`）；`install.ps1 -Check` 与 Codex 技能优先读取该文件，`base_url` 仅作回退。不要固定端口。
 
 4. 在 Codex 中使用 `$deepseek-harness`，并说明任务和工作区。
 

@@ -10,7 +10,7 @@ The underlying authenticated loopback HTTP protocol is client-independent. Other
 
 ## Install
 
-1. In DSH, open **Settings → Plugins → Add plugin** and enter `https://github.com/ESROAMER/codex-dsh-collab`, a local checkout, or `@esroamer/codex-dsh-collab`. All-workspace setup and workspace registration require **0.2.0+**.
+1. In DSH, open **Settings → Plugins → Add plugin** and enter `https://github.com/Chi-hong22/codex-dsh-collab`, a local checkout, or `@esroamer/codex-dsh-collab`. All-workspace setup and workspace registration require **0.2.0+**.
 2. Download or clone this repository. From its root, run:
 
    ```powershell
@@ -23,6 +23,8 @@ The underlying authenticated loopback HTTP protocol is client-independent. Other
    ```powershell
    .\install.ps1 -Check
    ```
+
+   The desktop assigns its port at startup. The plugin publishes the actual address to `runtime.json` (default `~/.dsh/codex-bridge/runtime.json`); `install.ps1 -Check` and the Codex skill read it first and fall back to the configured `base_url`. Do not pin a port.
 
 4. In Codex, use `$deepseek-harness` and describe the task and workspace.
 
