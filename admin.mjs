@@ -205,7 +205,7 @@ const prune = async (args) => {
 const doctor = async () => {
   const dir = stateDir()
   process.stdout.write(`state directory: ${dir}\n`)
-  for (const name of ['state.json', 'tokens.json']) {
+  for (const name of ['state.json', 'tokens.json', 'runtime.json']) {
     const path = join(dir, name)
     try {
       const stats = await readFile(path)
@@ -214,7 +214,7 @@ const doctor = async () => {
       process.stdout.write(`  ${name}: ${error?.code === 'ENOENT' ? 'absent (created on first use)' : `unreadable: ${String(error)}`}\n`)
     }
   }
-  process.stdout.write('bridge HTTP surface: prefix /codex-bridge on the running desktop web server (default port 19387)\n')
+  process.stdout.write('bridge HTTP surface: prefix /codex-bridge on the running desktop web server (port assigned at startup, published in runtime.json)\n')
   process.stdout.write('note: the bridge loads when the desktop profile mounts the stable dsh-codex-bridge runtime bundle\n')
 }
 

@@ -43,18 +43,34 @@ async function workspaces() {
   if (doc.unit?.name !== 'workspace' || !doc.tables?.workspaces) throw Error('Unsupported workspace storage. Supply a compatible DSH Desktop; no storage will be changed.');
   return Object.entries(doc.tables.workspaces).map(([id, w]) => ({id, title: w.title, path: w.path}));
 }
+async function publishedBase(settings) {
+  // Older installations only record the token file; the runtime file lives beside it.
+  const location = settings.runtime_file ?? join(dirname(settings.token_file), 'runtime.json');
+  try { const doc = await json(location); return typeof doc.baseUrl === 'string' ? doc.baseUrl : null; }
+  catch { return null; }
+}
 async function check() {
   const settings = await json(join(skillDir, 'references', 'local-settings.json'));
-  validateUrl(settings.base_url);
   const token = (await readFile(settings.token_file, 'utf8')).trim();
+  // The desktop binds an OS-assigned port, so the URL it publishes at startup wins
+  // over the configured fallback (which matters only before the first publish).
+  const candidates = [...new Set([await publishedBase(settings), settings.base_url].filter(Boolean))];
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
+  const failures = [];
   try {
-    const response = await fetch(settings.base_url + '/health', {headers: {authorization: 'Bearer ' + token}, redirect: 'error', signal: controller.signal});
-    const body = await response.json();
-    if (!response.ok || body.value?.bridge !== 'ready') throw Error(`Health check failed (HTTP ${response.status}). Open/restart DSH and check plugin settings.`);
-    console.log('Bridge ready. Protocol:', body.protocolVersion, 'PID:', body.value.pid);
-    console.log('This only checks connectivity; test desktop grouping, model selection and live messages separately.');
+    for (const base of candidates) {
+      try {
+        validateUrl(base);
+        const response = await fetch(base.replace(/\/+$/, '') + '/health', {headers: {authorization: 'Bearer ' + token}, redirect: 'error', signal: controller.signal});
+        const body = await response.json();
+        if (!response.ok || body.value?.bridge !== 'ready') throw Error(`health check failed (HTTP ${response.status})`);
+        console.log('Bridge ready. Protocol:', body.protocolVersion, 'PID:', body.value.pid);
+        console.log('This only checks connectivity; test desktop grouping, model selection and live messages separately.');
+        return;
+      } catch (e) { failures.push(`${base} (${e.message})`); }
+    }
+    throw Error(`Cannot reach the bridge; tried ${failures.join('; ')}. Open/restart DSH Desktop and run -Check again.`);
   } finally { clearTimeout(timer); }
 }
 async function uninstall() {
@@ -150,7 +166,7 @@ async function install() {
     await mkdir(stateDir, {recursive: true});
     await writeFile(tokenFile, token + '\n', {mode: 0o600});
     await atomic(tokensFile, tokens);
-    await atomic(join(skillDir, 'references', 'local-settings.json'), {base_url: base, token_file: tokenFile, python_executable: option('--python', null), installation_id: installationId});
+    await atomic(join(skillDir, 'references', 'local-settings.json'), {base_url: base, runtime_file: join(stateDir, 'runtime.json'), token_file: tokenFile, python_executable: option('--python', null), installation_id: installationId});
     await atomic(manifestFile, {version: 1, installationId, dshHome: dsh, codexHome: codex, pluginDir, skillDir, installedPlugin: managed || !has('--configure-only'), linkSpec, tokenAlias: alias, tokenFile, previousSkill: previous ? (previous.previousSkill ?? null) : (skillBackup ?? null), backupDir});
   } catch (e) {
     await cp(join(backupDir, 'package.json'), profileFile);

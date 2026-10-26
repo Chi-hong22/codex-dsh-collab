@@ -404,6 +404,7 @@ export function apply(ctx, config = {}) {
 
   const statePath = join(stateDir, 'state.json')
   const tokensPath = join(stateDir, 'tokens.json')
+  const runtimePath = join(stateDir, 'runtime.json')
   const stateStore = new JsonStore(statePath, 0o600)
   const tokenStore = new JsonStore(tokensPath, 0o600)
 
@@ -1678,13 +1679,40 @@ export function apply(ctx, config = {}) {
 
   /* ── lifecycle ─────────────────────────────────────────────────────── */
 
+  /**
+   * Publish the effective mount point for external clients.
+   *
+   * The desktop host starts this web server with `--port 0`, so the OS assigns
+   * the loopback port at startup and it changes on every launch. A static base
+   * URL therefore goes stale after a restart; this file carries the address of
+   * the running process and is rewritten whenever the plugin mounts.
+   */
+  const publishRuntime = async () => {
+    const port = ctx.webServer.port
+    if (!Number.isInteger(port) || port <= 0) return
+    const configuredHost = asString(ctx.webServer.host)
+    const host = configuredHost === undefined || configuredHost === '0.0.0.0' ? '127.0.0.1' : configuredHost
+    const protocol = (asString(ctx.webServer.protocol) ?? 'http:').replace(/:?$/, ':')
+    const document = {
+      version: 1,
+      baseUrl: `${protocol}//${host}:${port}${prefix}`,
+      port,
+      prefix,
+      pid: process.pid,
+      startedAt: new Date().toISOString(),
+    }
+    await mkdir(stateDir, { recursive: true })
+    await writeFileAtomic(runtimePath, `${JSON.stringify(document, null, 2)}\n`, 0o600)
+  }
+
   ctx.effect(() => {
     const dispose = ctx.webServer.register({ kind: 'prefix', path: prefix, handler: handle })
+    void publishRuntime().catch((error) => logger.warn?.(`codex-bridge: could not publish the runtime file: ${String(error)}`))
     return () => {
       for (const sessionId of [...followers.keys()]) dropFollower(sessionId)
       dispose()
     }
-  }, 'codex-bridge: route and followers')
+  }, 'codex-bridge: route, runtime file and followers')
 
   void bootstrap().catch((error) => logger.warn?.(`codex-bridge: state bootstrap failed: ${String(error)}`))
   logger.info?.(`codex-bridge: mounted at ${prefix} (state: ${stateDir})`)
