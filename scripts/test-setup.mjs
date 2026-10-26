@@ -33,6 +33,7 @@ try {
   assert.deepEqual(Object.values(tokens.tokens)[0].workspaceIds, ['one','two']);
   const settings = JSON.parse(await readFile(join(codex,'skills','deepseek-harness','references','local-settings.json')));
   assert((await readFile(settings.token_file,'utf8')).startsWith('dshb_'));
+  assert.equal(settings.runtime_file, join(dsh,'codex-bridge','runtime.json'));
   run('--configure-only','--workspace','two');
   run('--configure-only','--all-workspaces','--allow-workspace-create');
   const wideTokens = JSON.parse(await readFile(join(dsh,'codex-bridge','tokens.json')));

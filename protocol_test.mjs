@@ -15,7 +15,7 @@
 
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { apply } from './index.js'
@@ -42,6 +42,10 @@ const startBridge = async (options = {}) => {
   const capturing = {
     ...host.ctx,
     webServer: {
+      // A real desktop host binds an OS-assigned port; the plugin publishes it.
+      port: 45123,
+      host: '127.0.0.1',
+      protocol: 'http:',
       register: (route) => {
         handler = route.handler
         return () => {
@@ -54,12 +58,18 @@ const startBridge = async (options = {}) => {
   // The plugin mounts inside ctx.effect, which the fake runs synchronously.
   assert.ok(handler !== undefined, 'the plugin registered no route')
   await new Promise((resolve) => setTimeout(resolve, 50))
+  const runtimePath = join(stateDir, 'runtime.json')
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    if (await readFile(runtimePath, 'utf8').then(() => true, () => false)) break
+    await new Promise((resolve) => setTimeout(resolve, 20))
+  }
   const server = createServer((req, res) => handler(req, res))
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
   const { port } = server.address()
   return {
     host,
     stateDir,
+    runtimePath,
     // The web server dispatches by prefix to this handler, so the test client
     // addresses the same absolute paths a real client would.
     base: `http://127.0.0.1:${port}/codex-bridge`,
@@ -109,6 +119,13 @@ const main = async () => {
   const token = 'dshb_test-token-aaaaaaaaaaaaaaaaaaaaaaaa'
   const otherToken = 'dshb_test-token-bbbbbbbbbbbbbbbbbbbbbbbb'
   const bridge = await startBridge({ config: { workspacePaths: [PATH_A, PATH_B] } })
+  await check('mount publishes the effective base URL for external clients', async () => {
+    const runtime = JSON.parse(await readFile(bridge.runtimePath, 'utf8'))
+    assert.equal(runtime.version, 1)
+    assert.equal(runtime.baseUrl, 'http://127.0.0.1:45123/codex-bridge')
+    assert.equal(runtime.port, 45123)
+    assert.equal(runtime.prefix, '/codex-bridge')
+  })
   const tokensPath = join(bridge.stateDir, 'tokens.json')
   const { createHash } = await import('node:crypto')
   await writeFile(tokensPath, `${JSON.stringify({
