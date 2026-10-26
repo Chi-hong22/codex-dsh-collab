@@ -1,10 +1,12 @@
-# Codex–DSH 协作插件
+# codex-dsh-collab
+
+> **一个本地、带认证的桥：连接 Codex 与 DeepSeek Harness Desktop（DSH）。**
 
 [English](README.md) · [桥接协议](PROTOCOL.md) · [AI 索引](llms.txt)
 
-Codex 通过本机回环认证桥，把任务交给 DeepSeek Harness Desktop（DSH）工作区，等待执行、回读转写，再接着对话。仓库包含一个 DSH 插件和配套的 `$deepseek-harness` Codex 技能。
+codex-dsh-collab 由一个 DSH 插件和一个 Codex 技能组成。Codex 通过本机回环认证桥，把任务交给 DSH 工作区，等待执行、回读转写，再接着对话。
 
-npm 包名为 `@esroamer/codex-dsh-collab`，桥模块名为 `dsh-codex-bridge`。
+`@esroamer/codex-dsh-collab`（npm 包） · `dsh-codex-bridge`（桥模块） · `$deepseek-harness`（Codex 技能）
 
 | 组成 | 作用 |
 | --- | --- |

@@ -1,6 +1,6 @@
-# Codex ↔ DSH Collaboration
+# codex-dsh-collab
 
-> DSH plugin plus Codex skill that let Codex delegate tasks to a local DeepSeek Harness Desktop workspace over an authenticated loopback HTTP bridge: task dispatch, execution waits, transcript reads. Documents installation, the bridge protocol, and why the desktop port changes on every launch (runtime.json address discovery).
+> codex-dsh-collab is a DSH plugin plus a Codex skill that let Codex delegate tasks to a local DeepSeek Harness Desktop workspace over an authenticated loopback HTTP bridge: task dispatch, execution waits, transcript reads. Documents installation, the bridge protocol, and why the desktop port changes on every launch (runtime.json address discovery).
 >
 > Also known as: codex-dsh-collab, Codex DeepSeek Harness bridge, DSH bridge plugin, dsh-codex-bridge, `$deepseek-harness` skill.
 

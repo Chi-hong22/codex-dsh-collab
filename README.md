@@ -1,10 +1,12 @@
-# Codex ↔ DSH Collaboration
+# codex-dsh-collab
+
+> **A local, authenticated bridge between Codex and DeepSeek Harness Desktop (DSH).**
 
 [中文说明](README.zh-CN.md) · [Bridge protocol](PROTOCOL.md) · [AI index](llms.txt)
 
-Codex delegates tasks to a local DeepSeek Harness Desktop (DSH) workspace through an authenticated loopback HTTP bridge, waits for the run, reads the transcript, and continues the conversation. The repository ships a DSH plugin and the `$deepseek-harness` Codex skill that talks to it.
+codex-dsh-collab is a DSH plugin plus a Codex skill. Codex delegates a task to a local DSH workspace over an authenticated loopback HTTP bridge, waits for the run, reads the transcript, and continues the conversation.
 
-The npm package is `@esroamer/codex-dsh-collab`; the bridge module name is `dsh-codex-bridge`.
+`@esroamer/codex-dsh-collab` (npm package) · `dsh-codex-bridge` (bridge module) · `$deepseek-harness` (Codex skill)
 
 | Part | Role |
 | --- | --- |
