@@ -1695,11 +1695,14 @@ export function apply(ctx, config = {}) {
    */
   const publishRuntime = async () => {
     const port = ctx.webServer.port
-    if (!Number.isInteger(port) || port <= 0) return
+    if (!Number.isInteger(port) || port <= 0) {
+      logger.warn?.('codex-bridge: the web server reports no listening port; runtime.json was not published')
+      return
+    }
     const configuredHost = asString(ctx.webServer.host)
     const host = configuredHost === undefined || configuredHost === '0.0.0.0' ? '127.0.0.1' : configuredHost
     const protocol = (asString(ctx.webServer.protocol) ?? 'http:').replace(/:?$/, ':')
-    const document = {
+    const runtimeDocument = {
       version: 1,
       baseUrl: `${protocol}//${host}:${port}${prefix}`,
       port,
@@ -1708,7 +1711,7 @@ export function apply(ctx, config = {}) {
       startedAt: new Date().toISOString(),
     }
     await mkdir(stateDir, { recursive: true })
-    await writeFileAtomic(runtimePath, `${JSON.stringify(document, null, 2)}\n`, 0o600)
+    await writeFileAtomic(runtimePath, `${JSON.stringify(runtimeDocument, null, 2)}\n`, 0o600)
   }
 
   ctx.effect(() => {

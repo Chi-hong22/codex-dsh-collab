@@ -45,7 +45,7 @@ async function workspaces() {
 }
 async function publishedBase(settings) {
   // Older installations only record the token file; the runtime file lives beside it.
-  const location = settings.runtime_file ?? join(dirname(settings.token_file), 'runtime.json');
+  const location = process.env.DSH_CODEX_BRIDGE_RUNTIME_FILE ?? settings.runtime_file ?? join(dirname(settings.token_file), 'runtime.json');
   try { const doc = await json(location); return typeof doc.baseUrl === 'string' ? doc.baseUrl : null; }
   catch { return null; }
 }
@@ -54,24 +54,26 @@ async function check() {
   const token = (await readFile(settings.token_file, 'utf8')).trim();
   // The desktop binds an OS-assigned port, so the URL it publishes at startup wins
   // over the configured fallback (which matters only before the first publish).
-  const candidates = [...new Set([await publishedBase(settings), settings.base_url].filter(Boolean))];
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  // An explicit DSH_CODEX_BRIDGE_URL disables discovery, mirroring bridge.py.
+  const explicit = process.env.DSH_CODEX_BRIDGE_URL;
+  const candidates = explicit ? [explicit] : [...new Set([await publishedBase(settings), settings.base_url].filter(Boolean))];
   const failures = [];
-  try {
-    for (const base of candidates) {
-      try {
-        validateUrl(base);
-        const response = await fetch(base.replace(/\/+$/, '') + '/health', {headers: {authorization: 'Bearer ' + token}, redirect: 'error', signal: controller.signal});
-        const body = await response.json();
-        if (!response.ok || body.value?.bridge !== 'ready') throw Error(`health check failed (HTTP ${response.status})`);
-        console.log('Bridge ready. Protocol:', body.protocolVersion, 'PID:', body.value.pid);
-        console.log('This only checks connectivity; test desktop grouping, model selection and live messages separately.');
-        return;
-      } catch (e) { failures.push(`${base} (${e.message})`); }
-    }
-    throw Error(`Cannot reach the bridge; tried ${failures.join('; ')}. Open/restart DSH Desktop and run -Check again.`);
-  } finally { clearTimeout(timer); }
+  for (const base of candidates) {
+    // Each candidate gets its own budget so a hung published address cannot abort the fallback.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    try {
+      validateUrl(base);
+      const response = await fetch(base.replace(/\/+$/, '') + '/health', {headers: {authorization: 'Bearer ' + token}, redirect: 'error', signal: controller.signal});
+      const body = await response.json();
+      if (!response.ok || body.value?.bridge !== 'ready') throw Error(`health check failed (HTTP ${response.status})`);
+      console.log('Bridge ready. Protocol:', body.protocolVersion, 'PID:', body.value.pid);
+      console.log('This only checks connectivity; test desktop grouping, model selection and live messages separately.');
+      return;
+    } catch (e) { failures.push(`${base} (${e.message})`); }
+    finally { clearTimeout(timer); }
+  }
+  throw Error(`Cannot reach the bridge; tried ${failures.join('; ')}. Open/restart DSH Desktop and run -Check again.`);
 }
 async function uninstall() {
   const manifest = await json(manifestFile);

@@ -10,7 +10,7 @@
 
 相同调用者、requestId 和规范路径/标题返回持久化回放；相同 ID 改变内容返回 409；注册权限不足/吊销或部署不允许返回 403（先检查权限，再读取回放记录）。重复目录注册不产生新工作区。请求记录与 task 状态一起保存，不包含凭据。
 
-- 基址：`http://127.0.0.1:<desktop port>/codex-bridge`。桌面以 `--port 0` 启动，端口每次运行由系统分配，插件挂载时把实际地址发布到 `~/.dsh/codex-bridge/runtime.json` 的 `baseUrl`；客户端应优先读取该文件，`local-settings.json` 的 `base_url` 仅作回退。前缀可由配置改写。
+- 基址：`http://127.0.0.1:<desktop port>/codex-bridge`。桌面以 `--port 0` 启动，端口每次运行由系统分配，插件挂载时把实际地址原子写入 `runtime.json`（默认 `~/.dsh/codex-bridge/runtime.json`，安装脚本会把实际 `stateDir` 写入插件配置；字段为 `version`、`baseUrl`、`port`、`prefix`、`pid`、`startedAt`）；客户端应优先读取该文件的 `baseUrl`，`local-settings.json` 的 `base_url` 仅作回退。前缀可由配置改写。
 - 认证：每个请求都必须带 `Authorization: Bearer <token>`。缺头 → 401 `auth/missing-token`；未知/已吊销 → 403 `auth/invalid-token`。
 - 传输：HTTP/1.1，JSON 请求与响应；事件流为 `text/event-stream`。
 - 请求体上限默认 256 KiB（`maxRequestBytes`）；超限 → 413 `request/too-large`。

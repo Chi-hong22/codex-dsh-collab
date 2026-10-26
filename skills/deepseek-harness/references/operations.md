@@ -1,6 +1,6 @@
 # Bridge operations
 
-All responses are `{ok, protocolVersion, requestId, value}`. Errors contain `{error: {code, message, details}}`. `scripts/bridge.py` returns exit 0 on a successful bridge response, 2 on a bridge refusal, and 3 on a local/transport error. It never retries mutations automatically. An `--output` file contains the full response envelope.
+All responses are `{ok, protocolVersion, requestId, value}`. Errors contain `{error: {code, message, details}}`. `scripts/bridge.py` returns exit 0 on a successful bridge response, 2 on a bridge refusal, and 3 on a local/transport error. It retries against the next candidate base URL only when the previous address is unreachable (distinct hosts/ports from the published runtime file and `base_url`); mutations carry a stable `requestId`, so such a retry replays instead of duplicating. Any HTTP response proves that candidate is the bridge, so HTTP refusals are returned rather than retried. An `--output` file contains the full response envelope.
 
 In the commands below, replace `<python>` and `<bridge.py>` with absolute paths from the skill/local setup. Working JSON files belong in the current task's writable directory; their names are examples. Use an available file-writing tool or literal PowerShell here-string to save UTF-8 JSON rather than putting multiline prompts into shell arguments.
 

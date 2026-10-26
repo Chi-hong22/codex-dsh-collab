@@ -122,7 +122,13 @@ def request(config_path, method, route, query=None, body=None, timeout=40):
         req = urllib.request.Request(base + route + query_string, data=data, headers=headers, method=method)
         try:
             with opener.open(req, timeout=timeout) as response:
-                return response.status, json.load(response)
+                try:
+                    payload = json.load(response)
+                except ValueError:
+                    # A stale port can now belong to an unrelated local service.
+                    failures.append(f'{base} (invalid JSON response)')
+                    continue
+                return response.status, payload
         except urllib.error.HTTPError as error:
             # The bridge answered, so this candidate is the right one.
             status = error.code
@@ -133,6 +139,9 @@ def request(config_path, method, route, query=None, body=None, timeout=40):
             return status, payload
         except urllib.error.URLError as error:
             failures.append(f'{base} ({error.reason})')
+        except OSError as error:
+            # The response can also fail while being read, after the connection opened.
+            failures.append(f'{base} ({error})')
     raise ValueError('Cannot reach the bridge; tried ' + '; '.join(failures) + '. Is DSH Desktop running?')
 
 
@@ -159,7 +168,7 @@ def main(argv=None):
     try:
         body = load_json(args.body_file) if args.body_file else None
         status, payload = request(args.config, args.method, args.route, query, body, args.timeout)
-        successful = 200 <= status < 300 and payload.get('ok') is True
+        successful = 200 <= status < 300 and isinstance(payload, dict) and payload.get('ok') is True
         rendered = json.dumps(payload, ensure_ascii=False, indent=2)
         if args.output:
             args.output.write_text(rendered + '\n', encoding='utf-8')
