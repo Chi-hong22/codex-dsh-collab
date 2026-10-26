@@ -1,7 +1,7 @@
 {
   "name": "@esroamer/codex-dsh-collab",
   "displayName": "Codex ↔ DSH Collaboration",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Workspace-aware collaboration: Codex delegates tasks to DeepSeek Harness, follows execution, reads results, and continues the work.",
   "type": "module",
   "main": "index.js",
@@ -15,7 +15,8 @@
     "skills",
     "scripts",
     "install.ps1",
-    "README.zh-CN.md"
+    "README.zh-CN.md",
+    "llms.txt"
   ],
   "exports": {
     ".": "./index.js",
