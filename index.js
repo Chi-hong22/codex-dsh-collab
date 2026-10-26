@@ -1686,6 +1686,12 @@ export function apply(ctx, config = {}) {
    * the loopback port at startup and it changes on every launch. A static base
    * URL therefore goes stale after a restart; this file carries the address of
    * the running process and is rewritten whenever the plugin mounts.
+   *
+   * This runs from `apply()`, which cannot execute before the host's web server
+   * is listening: `inject` lists `webServer`, and a dependent plugin only starts
+   * once the providing fiber becomes active, which happens after that server's
+   * `[Service.init]` resolves on its listening socket. The port is therefore
+   * already assigned when the document is written.
    */
   const publishRuntime = async () => {
     const port = ctx.webServer.port
