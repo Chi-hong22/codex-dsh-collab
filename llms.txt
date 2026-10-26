@@ -1,0 +1,22 @@
+# Codex ↔ DSH Collaboration
+
+> DSH plugin plus Codex skill that let Codex delegate tasks to a local DeepSeek Harness Desktop workspace over an authenticated loopback HTTP bridge: task dispatch, execution waits, transcript reads. Documents installation, the bridge protocol, and why the desktop port changes on every launch (runtime.json address discovery).
+
+## Overview
+
+- [README (English)](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/README.md): what the project does, install steps, bridge address resolution, troubleshooting, security.
+- [README (Chinese)](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/README.zh-CN.md): same content in Chinese.
+
+## Protocol and client
+
+- [PROTOCOL.md](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/PROTOCOL.md): HTTP/JSON routes, bearer authentication, request and response shapes, error format, workspace scoping.
+- [Codex skill](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/skills/deepseek-harness/SKILL.md): how Codex invokes the client, dispatches tasks, waits, and reads transcripts.
+- [local-setup.md](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/skills/deepseek-harness/references/local-setup.md): environment variables DSH_CODEX_BRIDGE_URL, DSH_CODEX_BRIDGE_RUNTIME_FILE, DSH_CODEX_BRIDGE_TOKEN_FILE; runtime.json fields; local file locations.
+- [operations.md](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/skills/deepseek-harness/references/operations.md): operational constraints and mutation semantics.
+- [windows-shell-startup.md](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/skills/deepseek-harness/references/windows-shell-startup.md): DSH pwsh start failure 3221225794 (0xC0000142) on Windows.
+
+## Optional
+
+- [Repository](https://github.com/Chi-hong22/codex-dsh-collab): source, issues, releases.
+- [Upstream project](https://github.com/ESROAMER/codex-dsh-collab): original project this fork is based on.
+- [License](https://github.com/Chi-hong22/codex-dsh-collab/blob/main/LICENSE): MIT.
